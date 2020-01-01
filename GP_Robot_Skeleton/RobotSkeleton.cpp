@@ -15,6 +15,10 @@ HBITMAP hBMP = NULL;
 
 float rx, ry, rz = 0.0;
 
+int movePart = 0;
+float mx, my, mz = 0.0;
+float speed = 0.1;
+
 // TODO: Combine duplicating shapes Eg: upperlimbs, upperlimbs2, lowerlimbs, lowerlimbs2
 
 // DEVELOPING BASIC SHAPES
@@ -315,6 +319,12 @@ void foot() {
 
 // CONSTRUCTING HUMANOID
 void headNeck() {
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 1) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
+
+
 	glPushMatrix();
 	glTranslatef(0.0, 6, 0.0);
 	head();
@@ -325,6 +335,8 @@ void headNeck() {
 	glRotatef(90.0, 1.0, 0.0, 0.0);
 	neck();
 	glPopMatrix();
+
+	glPopAttrib();
 }
 
 void upperBody() {
@@ -372,37 +384,81 @@ void upperLimbs3() {
 }
 
 void leftULimb() {
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 31 || movePart == 33) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
+
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 41 || movePart == 43) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(2.5, 3, 0.0);
 		upperLimbs();
 	glPopMatrix();
+	glPopAttrib();
 
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 51 || movePart == 53) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(2.5, 0.1, 0.0);
 		upperLimbs2();
 	glPopMatrix();
+	glPopAttrib();
 
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 61 || movePart == 63) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(2.5, -2.8, 0.0);
 		upperLimbs3();
 	glPopMatrix();
+	glPopAttrib();
+
+	glPopAttrib();
 }
 
 void rightULimb() {
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 32 || movePart == 33) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
+
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 42 || movePart == 43) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(-2.5, 3, 0.0);
 		upperLimbs();
 	glPopMatrix();
+	glPopAttrib();
 
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 52 || movePart == 53) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(-2.5, 0.1, 0.0);
 		upperLimbs2();
 	glPopMatrix();
+	glPopAttrib();
 
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 62 || movePart == 63) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(-2.5, -2.8, 0.0);
 		upperLimbs3();
 	glPopMatrix();
+	glPopAttrib();
+
+	glPopAttrib();
 }
 
 // This part will not rotate and only translate together with upperbody and headneck when walking
@@ -452,11 +508,25 @@ void lowerLimbs3() {
 }
 
 void leftDLimb() {
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 71 || movePart == 73) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
+
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 81 || movePart == 83) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(1.3, -3.3, 0.0);
 		lowerLimbs();
 	glPopMatrix();
+	glPopAttrib();
 
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 91 || movePart == 93) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(1.3, -6.2, 0.0);
 		lowerLimbs2();
@@ -466,14 +536,31 @@ void leftDLimb() {
 		glTranslatef(1.3, -9.0, 0.0);
 		lowerLimbs3();
 	glPopMatrix();
+	glPopAttrib();
+
+	glPopAttrib();
 }
 
 void rightDLimb() {
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 72 || movePart == 73) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
+
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 82 || movePart == 83) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(-1.3, -3.3, 0.0);
 		lowerLimbs();
 	glPopMatrix();
+	glPopAttrib();
 
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 92 || movePart == 93) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	glPushMatrix();
 		glTranslatef(-1.3, -6.2, 0.0);
 		lowerLimbs2();
@@ -483,9 +570,16 @@ void rightDLimb() {
 		glTranslatef(-1.3, -9.0, 0.0);
 		lowerLimbs3();
 	glPopMatrix();
+	glPopAttrib();
+
+	glPopAttrib();
 }
 
 void robot() {
+	glPushAttrib(GL_CURRENT_BIT);
+	if (movePart == 2) {
+		glColor3f(1.0, 0.0, 0.0);
+	}
 	// Head & Neck
 	headNeck();
 
@@ -495,6 +589,8 @@ void robot() {
 	// Upper Limbs
 	leftULimb();
 	rightULimb();
+
+	glPopAttrib();
 
 	// Lower Body
 	lowerBody();
@@ -522,6 +618,72 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		if (wParam == 'Q') { rx = 0.0; ry = 0.0; rz = 1.0; }
 		if (wParam == 'E') { rx = 0.0; ry = 0.0; rz = -1.0; }
 		if (wParam == VK_SPACE) { rx = 0.0; ry = 0.0; rz = 0.0; glLoadIdentity(); }
+		if (wParam == 0x31) {
+			movePart = 1;
+		}
+		if (wParam == 0x32) {
+			movePart = 2;
+		}
+		if (wParam == 0x33) {
+			if (movePart == 31) 
+				movePart = 32;
+			else if (movePart == 32)
+				movePart = 33;
+			else
+				movePart = 31;
+		}
+		if (wParam == 0x34) {
+			if (movePart == 41)
+				movePart = 42;
+			else if (movePart == 42)
+				movePart = 43;
+			else
+				movePart = 41;
+		}
+		if (wParam == 0x35) {
+			if (movePart == 51)
+				movePart = 52;
+			else if (movePart == 52)
+				movePart = 53;
+			else
+				movePart = 51;
+		}
+		if (wParam == 0x36) {
+			if (movePart == 61)
+				movePart = 62;
+			else if (movePart == 62)
+				movePart = 63;
+			else
+				movePart = 61;
+		}
+		if (wParam == 0x37) {
+			if (movePart == 71)
+				movePart = 72;
+			else if (movePart == 72)
+				movePart = 73;
+			else
+				movePart = 71;
+		}
+		if (wParam == 0x38) {
+			if (movePart == 81)
+				movePart = 82;
+			else if (movePart == 82)
+				movePart = 83;
+			else
+				movePart = 81;
+		}
+		if (wParam == 0x39) {
+			if (movePart == 91)
+				movePart = 92;
+			else if (movePart == 92)
+				movePart = 93;
+			else
+				movePart = 91;
+		}
+
+
+
+
 
 
 		break;
@@ -576,15 +738,16 @@ void display()
 	if (rx != 0.0 || ry != 0.0 || rz != 0.0)
 		glRotatef(0.05, rx, ry, rz);
 
-
-
 	// vv Draw outline vv
 	glEnable(GL_POLYGON_OFFSET_FILL);
-	glPolygonOffset(-1.0, 0.0);
+	glPolygonOffset(1.0, 0.0);
+	glColor3f(0.0, 0.0, 1.0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	robot();
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glColor3f(1.0, 1.0, 1.0);
 	// ^^ Draw outline ^^
 
 	robot();
