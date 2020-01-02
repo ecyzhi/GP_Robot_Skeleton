@@ -19,6 +19,7 @@ float lightPos[] = { lx, ly, lz };
 
 float dif[] = { 1.0, 1.0, 1.0 };
 float green[] = { 0.0, 1.0, 0.0 };
+float grey[] = { 0.6, 0.6, 0.6 };
 
 float lightSpeed = 0.1;
 boolean lightOn = false;
@@ -683,6 +684,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		if (wParam == 'Q') { rx = 0.0; ry = 0.0; rz = 1.0; }
 		if (wParam == 'E') { rx = 0.0; ry = 0.0; rz = -1.0; }
 		if (wParam == VK_SPACE) { rx = 0.0; ry = 0.0; rz = 0.0; glLoadIdentity(); }
+		if (wParam == 0x30) {
+			movePart = 0;
+		}
 		if (wParam == 0x31) {
 			movePart = 1;
 		}
@@ -849,7 +853,7 @@ void display()
 
 	glShadeModel(GL_SMOOTH);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-	glMaterialfv(GL_BACK, GL_AMBIENT, green);
+	glMaterialfv(GL_BACK, GL_AMBIENT, grey);
 
 	// Indicate the light source
 	glPointSize(20);
