@@ -10,7 +10,6 @@
 
 // For Lighting
 GLfloat fNormalX, fNormalY, fNormalZ = 0.0;
-GLfloat pointArray[] = { 0.0, 0.0, 0.0 };
 
 float lx = 8.0;
 float ly = 8.0;
@@ -18,6 +17,7 @@ float lz = 8.0;
 float lightPos[] = { lx, ly, lz };
 
 float dif[] = { 1.0, 1.0, 1.0 };
+float amb[] = { 1.0, 1.0, 1.0 };
 
 float green[] = { 0.0, 1.0, 0.0 };
 float yellow[] = { 1.0, 1.0, 0.0 };
@@ -43,6 +43,43 @@ float moveSpeed = 0.1;
 
 // TODO: Combine duplicating shapes Eg: upperlimbs, upperlimbs2, lowerlimbs, lowerlimbs2
 
+//*******************************************************************
+// Function: CalculateVectorNormal
+// 
+// Purpose: Given three points of a 3D plane, this function calculates
+//          the normal vector of that plane.
+// 
+// Parameters:
+//     fVert1[]   == array for 1st point (3 elements are x, y, and z).
+//     fVert2[]   == array for 2nd point (3 elements are x, y, and z).
+//     fVert3[]   == array for 3rd point (3 elements are x, y, and z).
+// 
+// Returns:
+//     fNormalX   == X vector for the normal vector
+//     fNormalY   == Y vector for the normal vector
+//     fNormalZ   == Z vector for the normal vector
+// 
+// Comments:
+// 
+// History:  Date       Author        Reason
+//           3/22/95     GGB           Created
+//**********************************************************************
+GLvoid CalculateVectorNormal(GLfloat fVert1[], GLfloat fVert2[], GLfloat fVert3[], GLfloat *fNormalX, GLfloat *fNormalY, GLfloat *fNormalZ) {
+	GLfloat Qx, Qy, Qz, Px, Py, Pz;
+
+	Qx = fVert2[0] - fVert1[0];
+	Qy = fVert2[1] - fVert1[1];
+	Qz = fVert2[2] - fVert1[2];
+	Px = fVert3[0] - fVert1[0];
+	Py = fVert3[1] - fVert1[1];
+	Pz = fVert3[2] - fVert1[2];
+
+	*fNormalX = Py * Qz - Pz * Qy;
+	*fNormalY = Pz * Qx - Px * Qz;
+	*fNormalZ = Px * Qy - Py * Qx;
+}
+
+
 // DEVELOPING BASIC SHAPES
 void head() {
 	GLUquadricObj* sphere = NULL;
@@ -54,124 +91,194 @@ void head() {
 }
 
 void chest() {
-	glBegin(GL_POLYGON);
+	GLfloat chestVertices[8][3] = {
+		2.5, 4.0, 1.0,
+		2.5, 4.0, -1.0,
+		-2.5, 4.0, -1.0,
+		-2.5, 4.0, 1.0,
+		1.5, 0.0, -0.8,
+		1.5, 0.0, 0.8,
+		-1.5, 0.0, 0.8,
+		-1.5, 0.0, -0.8
+	};
+
+	glBegin(GL_QUADS);
+
 	// Top
-	glVertex3f(2.5, 4, 1);		// 1
-	glVertex3f(2.5, 4, -1); 	// 2
-	glVertex3f(-2.5, 4, -1);	// 3
-	glVertex3f(-2.5, 4, 1); 	// 4
-
+	CalculateVectorNormal(chestVertices[2], chestVertices[1], chestVertices[0], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(chestVertices[0]);	// 1
+	glVertex3fv(chestVertices[1]); 	// 2
+	glVertex3fv(chestVertices[2]);	// 3
+	glVertex3fv(chestVertices[3]); 	// 4
+			  
 	// Front
-	glVertex3f(1.5, 0, 0.8);	// 6
-	glVertex3f(2.5, 4, 1);		// 1
-	glVertex3f(-2.5, 4, 1); 	// 4
-	glVertex3f(-1.5, 0, 0.8);	// 7
-
-	// Right
-	glVertex3f(1.5, 0, -0.8);	// 5
-	glVertex3f(2.5, 4, -1); 	// 2
-	glVertex3f(2.5, 4, 1);		// 1
-	glVertex3f(1.5, 0, 0.8);	// 6
-
-	// Back
-	glVertex3f(-1.5, 0, -0.8);	// 8
-	glVertex3f(-2.5, 4, -1);	// 3
-	glVertex3f(2.5, 4, -1); 	// 2
-	glVertex3f(1.5, 0, -0.8);	// 5
-
-	// Left
-	glVertex3f(-1.5, 0, 0.8);	// 7
-	glVertex3f(-2.5, 4, 1); 	// 4
-	glVertex3f(-2.5, 4, -1);	// 3
-	glVertex3f(-1.5, 0, -0.8);	// 8
-
+	CalculateVectorNormal(chestVertices[3], chestVertices[0], chestVertices[5], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(chestVertices[5]);	// 6
+	glVertex3fv(chestVertices[0]);	// 1
+	glVertex3fv(chestVertices[3]); 	// 4
+	glVertex3fv(chestVertices[6]);	// 7
+			  
+	// Right  
+	CalculateVectorNormal(chestVertices[0], chestVertices[1], chestVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(chestVertices[4]);	// 5
+	glVertex3fv(chestVertices[1]);	// 2
+	glVertex3fv(chestVertices[0]);	// 1
+	glVertex3fv(chestVertices[5]);	// 6
+			  
+	// Back	  
+	CalculateVectorNormal(chestVertices[1], chestVertices[2], chestVertices[7], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(chestVertices[7]);	// 8
+	glVertex3fv(chestVertices[2]);	// 3
+	glVertex3fv(chestVertices[1]); 	// 2
+	glVertex3fv(chestVertices[4]);	// 5
+			  
+	// Left	 
+	CalculateVectorNormal(chestVertices[2], chestVertices[3], chestVertices[6], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(chestVertices[6]);	// 7
+	glVertex3fv(chestVertices[3]);	// 4
+	glVertex3fv(chestVertices[2]);	// 3
+	glVertex3fv(chestVertices[7]);	// 8
+			  
 	// Bottom
-	glVertex3f(1.5, 0, -0.8);	// 5
-	glVertex3f(1.5, 0, 0.8);	// 6
-	glVertex3f(-1.5, 0, 0.8);	// 7
-	glVertex3f(-1.5, 0, -0.8);	// 8
+	CalculateVectorNormal(chestVertices[6], chestVertices[5], chestVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(chestVertices[4]);	// 5
+	glVertex3fv(chestVertices[5]);	// 6
+	glVertex3fv(chestVertices[6]);	// 7
+	glVertex3fv(chestVertices[7]);	// 8
 
 	glEnd();
 }
 
 void hip() {
-	glBegin(GL_POLYGON);
+	GLfloat hipVertices[8][3] = {
+		1.5, 0.0, 0.8,
+		1.5, 0.0, -0.8,
+		-1.5, 0.0, -0.8,
+		-1.5, 0.0, 0.8,
+		2.0, -1.0, -1.0,
+		2.0, -1.0, 1.0,
+		-2.0, -1.0, 1.0,
+		-2.0, -1.0, -1.0
+	};
+
+	glBegin(GL_QUADS);
 	// Top
-	glVertex3f(1.5, 0, 0.8);	// 1
-	glVertex3f(1.5, 0, -0.8);	// 2
-	glVertex3f(-1.5, 0, -0.8);	// 3
-	glVertex3f(-1.5, 0, 0.8);	// 4
-	
+	CalculateVectorNormal(hipVertices[2], hipVertices[1], hipVertices[0], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(hipVertices[0]);	// 1
+	glVertex3fv(hipVertices[1]);	// 2
+	glVertex3fv(hipVertices[2]);	// 3
+	glVertex3fv(hipVertices[3]);	// 4
+
 	// Front
-	glVertex3f(2, -1, 1);		// 6
-	glVertex3f(1.5, 0, 0.8);	// 1
-	glVertex3f(-1.5, 0, 0.8);	// 4
-	glVertex3f(-2, -1, 1);		// 7
+	CalculateVectorNormal(hipVertices[3], hipVertices[0], hipVertices[5], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(hipVertices[5]);	// 6
+	glVertex3fv(hipVertices[0]);	// 1
+	glVertex3fv(hipVertices[3]);	// 4
+	glVertex3fv(hipVertices[6]);	// 7
 
 	// Right
-	glVertex3f(2, -1, -1);		// 5
-	glVertex3f(1.5, 0, -0.8);	// 2
-	glVertex3f(1.5, 0, 0.8);	// 1
-	glVertex3f(2, -1, 1);		// 6
+	CalculateVectorNormal(hipVertices[0], hipVertices[1], hipVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(hipVertices[4]);	// 5
+	glVertex3fv(hipVertices[1]);	// 2
+	glVertex3fv(hipVertices[0]);	// 1
+	glVertex3fv(hipVertices[5]);	// 6
 
 	// Back
-	glVertex3f(-2, -1, -1);		// 8
-	glVertex3f(-1.5, 0, -0.8);	// 3
-	glVertex3f(1.5, 0, -0.8);	// 2
-	glVertex3f(2, -1, -1);		// 5
+	CalculateVectorNormal(hipVertices[1], hipVertices[2], hipVertices[7], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(hipVertices[7]);	// 8
+	glVertex3fv(hipVertices[2]);	// 3
+	glVertex3fv(hipVertices[1]);	// 2
+	glVertex3fv(hipVertices[4]);	// 5
 
 	// Left
-	glVertex3f(-2, -1, 1);		// 7
-	glVertex3f(-1.5, 0, 0.8);	// 4
-	glVertex3f(-1.5, 0, -0.8);	// 3
-	glVertex3f(-2, -1, -1);		// 8
+	CalculateVectorNormal(hipVertices[2], hipVertices[3], hipVertices[6], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(hipVertices[6]);	// 7
+	glVertex3fv(hipVertices[3]);	// 4
+	glVertex3fv(hipVertices[2]);	// 3
+	glVertex3fv(hipVertices[7]);	// 8
 
 	// Bottom
-	glVertex3f(2, -1, -1);		// 5
-	glVertex3f(2, -1, 1);		// 6
-	glVertex3f(-2, -1, 1);		// 7
-	glVertex3f(-2, -1, -1);		// 8
+	CalculateVectorNormal(hipVertices[6], hipVertices[5], hipVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(hipVertices[4]);	// 5
+	glVertex3fv(hipVertices[5]);	// 6
+	glVertex3fv(hipVertices[6]);	// 7
+	glVertex3fv(hipVertices[7]);	// 8
 
 	glEnd();
 }
 
 void buttocks() {
-	glBegin(GL_POLYGON);
+	GLfloat buttocksVertices[8][3] = {
+		2.0, 0.0, 1.0,
+		2.0, 0.0, -1.0,
+		-2.0, 0.0, -1.0,
+		-2.0, 0.0, 1.0,
+		0.5, -2.0, -0.8,
+		0.5, -2.0, 0.8,
+		-0.5, -2.0, 0.8,
+		-0.5, -2.0, -0.8
+	};
+
+	glBegin(GL_QUADS);
 	// Top
-	glVertex3f(2, 0, 1);		// 1
-	glVertex3f(2, 0, -1);		// 2
-	glVertex3f(-2, 0, -1);		// 3
-	glVertex3f(-2, 0, 1);		// 4
+	CalculateVectorNormal(buttocksVertices[2], buttocksVertices[1], buttocksVertices[0], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(buttocksVertices[0]);	// 1
+	glVertex3fv(buttocksVertices[1]);	// 2
+	glVertex3fv(buttocksVertices[2]);	// 3
+	glVertex3fv(buttocksVertices[3]);	// 4
 
 	// Front
-	glVertex3f(0.5, -2, 0.8);	// 6
-	glVertex3f(2, 0, 1);		// 1
-	glVertex3f(-2, 0, 1);		// 4
-	glVertex3f(-0.5, -2, 0.8);	// 7
+	CalculateVectorNormal(buttocksVertices[3], buttocksVertices[0], buttocksVertices[5], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(buttocksVertices[5]);	// 6
+	glVertex3fv(buttocksVertices[0]);	// 1
+	glVertex3fv(buttocksVertices[3]);	// 4
+	glVertex3fv(buttocksVertices[6]);	// 7
 
 	// Right
-	glVertex3f(0.5, -2, -0.8);	// 5
-	glVertex3f(2, 0, -1);		// 2
-	glVertex3f(2, 0, 1);		// 1
-	glVertex3f(0.5, -2, 0.8);	// 6
+	CalculateVectorNormal(buttocksVertices[0], buttocksVertices[1], buttocksVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(buttocksVertices[4]);	// 5
+	glVertex3fv(buttocksVertices[1]);	// 2
+	glVertex3fv(buttocksVertices[0]);	// 1
+	glVertex3fv(buttocksVertices[5]);	// 6
 
 	// Back
-	glVertex3f(-0.5, -2, -0.8);	// 8
-	glVertex3f(-2, 0, -1);		// 3
-	glVertex3f(2, 0, -1);		// 2
-	glVertex3f(0.5, -2, -0.8);	// 5
+	CalculateVectorNormal(buttocksVertices[1], buttocksVertices[2], buttocksVertices[7], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(buttocksVertices[7]);	// 8
+	glVertex3fv(buttocksVertices[2]);	// 3
+	glVertex3fv(buttocksVertices[1]);	// 2
+	glVertex3fv(buttocksVertices[4]);	// 5
 
 	// Left
-	glVertex3f(-0.5, -2, 0.8);	// 7
-	glVertex3f(-2, 0, 1);		// 4
-	glVertex3f(-2, 0, -1);		// 3
-	glVertex3f(-0.5, -2, -0.8);	// 8
+	CalculateVectorNormal(buttocksVertices[2], buttocksVertices[3], buttocksVertices[6], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(buttocksVertices[6]);	// 7
+	glVertex3fv(buttocksVertices[3]);	// 4
+	glVertex3fv(buttocksVertices[2]);	// 3
+	glVertex3fv(buttocksVertices[7]);	// 8
 
 	// Bottom
-	glVertex3f(0.5, -2, -0.8);	// 5
-	glVertex3f(0.5, -2, 0.8);	// 6
-	glVertex3f(-0.5, -2, 0.8);	// 7
-	glVertex3f(-0.5, -2, -0.8);	// 8
+	CalculateVectorNormal(buttocksVertices[6], buttocksVertices[5], buttocksVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(buttocksVertices[4]);	// 5
+	glVertex3fv(buttocksVertices[5]);	// 6
+	glVertex3fv(buttocksVertices[6]);	// 7
+	glVertex3fv(buttocksVertices[7]);	// 8
 
 	glEnd();
 }
@@ -204,139 +311,211 @@ void joint() {
 }
 
 void limb() {
-	glBegin(GL_POLYGON);
+	GLfloat limbVertices[8][3] = {
+		{0.5, 0.0, 0.5},
+		{0.5, 0.0, -0.5},
+		{-0.5, 0.0, -0.5},
+		{-0.5, 0.0, 0.5},
+		{0.5, -2.5, -0.5},
+		{0.5, -2.5, 0.5},
+		{-0.5, -2.5, 0.5},
+		{-0.5, -2.5, -0.5}
+	};
+
+	glBegin(GL_QUADS);
+
 	// Top
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(-0.5, 0, 0.5); 		// 4
-
+	CalculateVectorNormal(limbVertices[2], limbVertices[1], limbVertices[0], &fNormalX,  &fNormalY,  &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(limbVertices[0]);		// 1
+	glVertex3fv(limbVertices[1]); 		// 2
+	glVertex3fv(limbVertices[2]);		// 3
+	glVertex3fv(limbVertices[3]); 		// 4
+			  
 	// Front
-	glVertex3f(0.5, -2.5, 0.5);		// 6
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(-0.5, 0, 0.5); 		// 4
-	glVertex3f(-0.5, -2.5, 0.5);	// 7
-
+	CalculateVectorNormal(limbVertices[3], limbVertices[0], limbVertices[5], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(limbVertices[5]);		// 6
+	glVertex3fv(limbVertices[0]);		// 1
+	glVertex3fv(limbVertices[3]); 		// 4
+	glVertex3fv(limbVertices[6]);		// 7
+			  
 	// Right
-	glVertex3f(0.5, -2.5, -0.5);	// 5
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(0.5, -2.5, 0.5);		// 6
-
+	CalculateVectorNormal(limbVertices[0], limbVertices[1], limbVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(limbVertices[4]);		// 5
+	glVertex3fv(limbVertices[1]); 		// 2
+	glVertex3fv(limbVertices[0]);		// 1
+	glVertex3fv(limbVertices[5]);		// 6
+			  
 	// Back
-	glVertex3f(-0.5, -2.5, -0.5);	// 8
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(0.5, -2.5, -0.5);	// 5
-
+	CalculateVectorNormal(limbVertices[1], limbVertices[2], limbVertices[7], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(limbVertices[7]);		// 8
+	glVertex3fv(limbVertices[2]);		// 3
+	glVertex3fv(limbVertices[1]); 		// 2
+	glVertex3fv(limbVertices[4]);		// 5
+			  
 	// Left
-	glVertex3f(-0.5, -2.5, 0.5);	// 7
-	glVertex3f(-0.5, 0, 0.5); 		// 4
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(-0.5, -2.5, -0.5);	// 8
-
-	// Bottom
-	glVertex3f(0.5, -2.5, -0.5);	// 5
-	glVertex3f(0.5, -2.5, 0.5);		// 6
-	glVertex3f(-0.5, -2.5, 0.5);	// 7
-	glVertex3f(-0.5, -2.5, -0.5);	// 8
+	CalculateVectorNormal(limbVertices[2], limbVertices[3], limbVertices[6], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(limbVertices[6]);		// 7
+	glVertex3fv(limbVertices[3]); 		// 4
+	glVertex3fv(limbVertices[2]);		// 3
+	glVertex3fv(limbVertices[7]);		// 8
+			  
+	// Bottom 
+	CalculateVectorNormal(limbVertices[6], limbVertices[5], limbVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(limbVertices[4]);		// 5
+	glVertex3fv(limbVertices[5]);		// 6
+	glVertex3fv(limbVertices[6]);		// 7
+	glVertex3fv(limbVertices[7]);		// 8
 
 	glEnd();
 }
 
 void palm() {
-	glBegin(GL_POLYGON);
+	GLfloat palmVertices[8][3] = {
+		0.5, 0.0, 0.5,
+		0.5, 0.0, -0.5,
+		-0.5, 0.0, -0.5,
+		-0.5, 0.0, 0.5,
+		0.2, -1.5, -0.4,
+		0.2, -1.5, 0.4,
+		-0.2, -1.5, 0.4,
+		-0.2, -1.5, -0.4
+	};
+
+	glBegin(GL_QUADS);
 	// Top
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(-0.5, 0, 0.5); 		// 4
+	CalculateVectorNormal(palmVertices[2], palmVertices[1], palmVertices[0], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(palmVertices[0]);	// 1
+	glVertex3fv(palmVertices[1]);	// 2
+	glVertex3fv(palmVertices[2]);	// 3
+	glVertex3fv(palmVertices[3]);	// 4
 
 	// Front
-	glVertex3f(0.2, -1.5, 0.4);		// 6
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(-0.5, 0, 0.5); 		// 4
-	glVertex3f(-0.2, -1.5, 0.4);	// 7
+	CalculateVectorNormal(palmVertices[3], palmVertices[0], palmVertices[5], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(palmVertices[5]);	// 6
+	glVertex3fv(palmVertices[0]);	// 1
+	glVertex3fv(palmVertices[3]);	// 4
+	glVertex3fv(palmVertices[6]);	// 7
 
 	// Right
-	glVertex3f(0.2, -1.5, -0.4);	// 5
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(0.2, -1.5, 0.4);		// 6
+	CalculateVectorNormal(palmVertices[0], palmVertices[1], palmVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(palmVertices[4]);	// 5
+	glVertex3fv(palmVertices[1]);	// 2
+	glVertex3fv(palmVertices[0]);	// 1
+	glVertex3fv(palmVertices[5]);	// 6
 
 	// Back
-	glVertex3f(-0.2, -1.5, -0.4);	// 8
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(0.2, -1.5, -0.4);	// 5
+	CalculateVectorNormal(palmVertices[1], palmVertices[2], palmVertices[7], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(palmVertices[7]);	// 8
+	glVertex3fv(palmVertices[2]);	// 3
+	glVertex3fv(palmVertices[1]);	// 2
+	glVertex3fv(palmVertices[4]);	// 5
 
 	// Left
-	glVertex3f(-0.2, -1.5, 0.4);	// 7
-	glVertex3f(-0.5, 0, 0.5); 		// 4
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(-0.2, -1.5, -0.4);	// 8
+	CalculateVectorNormal(palmVertices[2], palmVertices[3], palmVertices[6], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(palmVertices[6]);	// 7
+	glVertex3fv(palmVertices[3]);	// 4
+	glVertex3fv(palmVertices[2]);	// 3
+	glVertex3fv(palmVertices[7]);	// 8
 
 	// Bottom
-	glVertex3f(0.2, -1.5, -0.4);	// 5
-	glVertex3f(0.2, -1.5, 0.4);		// 6
-	glVertex3f(-0.2, -1.5, 0.4);	// 7
-	glVertex3f(-0.2, -1.5, -0.4);	// 8
+	CalculateVectorNormal(palmVertices[6], palmVertices[5], palmVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(palmVertices[4]);	// 5
+	glVertex3fv(palmVertices[5]);	// 6
+	glVertex3fv(palmVertices[6]);	// 7
+	glVertex3fv(palmVertices[7]);	// 8
 
 	glEnd();
 }
 
 void foot() {
+	GLfloat footVertices[10][3] = {
+		0.5, 0.0, 0.5,
+		0.5, 0.0, -0.5,
+		-0.5, 0.0, -0.5,
+		-0.5, 0.0, 0.5,
+		0.5, -0.8, 2.0,
+		-0.5, -0.8, 2.0,
+		0.5, -1.5, -0.5,
+		0.5, -1.5, 2.0,
+		-0.5, -1.5, 2.0,
+		-0.5, -1.5, -0.5
+	};
+
 	glBegin(GL_QUADS);
 	// Top
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(-0.5, 0, 0.5); 		// 4
+	CalculateVectorNormal(footVertices[2], footVertices[1], footVertices[0], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(footVertices[0]);	// 1
+	glVertex3fv(footVertices[1]);	// 2
+	glVertex3fv(footVertices[2]);	// 3
+	glVertex3fv(footVertices[3]);	// 4
 
 	// Top2
-	glVertex3f(0.5, -0.8, 2.0);		// 5
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(-0.5, 0, 0.5); 		// 4
-	glVertex3f(-0.5, -0.8, 2.0);	// 6
+	CalculateVectorNormal(footVertices[3], footVertices[0], footVertices[4], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(footVertices[4]);	// 5
+	glVertex3fv(footVertices[0]);	// 1
+	glVertex3fv(footVertices[3]);	// 4
+	glVertex3fv(footVertices[5]);	// 6
 
 	// Front
-	glVertex3f(0.5, -1.5, 2.0);		// 8
-	glVertex3f(0.5, -0.8, 2.0);		// 5
-	glVertex3f(-0.5, -0.8, 2.0);	// 6
-	glVertex3f(-0.5, -1.5, 2.0);	// 9
+	CalculateVectorNormal(footVertices[5], footVertices[4], footVertices[7], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(footVertices[7]);	// 8
+	glVertex3fv(footVertices[4]);	// 5
+	glVertex3fv(footVertices[5]);	// 6
+	glVertex3fv(footVertices[8]);	// 9
 
 	// Bottom
-	glVertex3f(0.5, -1.5, 2.0);		// 8
-	glVertex3f(0.5, -1.5, -0.5);	// 7
-	glVertex3f(-0.5, -1.5, -0.5);	// 10
-	glVertex3f(-0.5, -1.5, 2.0);	// 9
+	CalculateVectorNormal(footVertices[9], footVertices[6], footVertices[7], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(footVertices[7]);	// 8
+	glVertex3fv(footVertices[6]);	// 7
+	glVertex3fv(footVertices[9]);	// 10
+	glVertex3fv(footVertices[8]);	// 9
 
 	// Back
-	glVertex3f(-0.5, -1.5, -0.5);	// 10
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(0.5, -1.5, -0.5);	// 7
+	CalculateVectorNormal(footVertices[1], footVertices[2], footVertices[9], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(footVertices[9]);	// 10
+	glVertex3fv(footVertices[2]);	// 3
+	glVertex3fv(footVertices[1]);	// 2
+	glVertex3fv(footVertices[6]);	// 7
 	glEnd();
 
 	glBegin(GL_POLYGON);
 	// Right
-	glVertex3f(0.5, -1.5, -0.5);	// 7
-	glVertex3f(0.5, 0, -0.5); 		// 2
-	glVertex3f(0.5, 0, 0.5);		// 1
-	glVertex3f(0.5, -0.8, 2.0);		// 5
-	glVertex3f(0.5, -1.5, 2.0);		// 8
+	CalculateVectorNormal(footVertices[0], footVertices[1], footVertices[6], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(footVertices[6]);	// 7
+	glVertex3fv(footVertices[1]);	// 2
+	glVertex3fv(footVertices[0]);	// 1
+	glVertex3fv(footVertices[4]);	// 5
+	glVertex3fv(footVertices[7]);	// 8
 	glEnd();
 
 	glBegin(GL_POLYGON);
 	// Left
-	glVertex3f(-0.5, -1.5, 2.0);	// 9
-	glVertex3f(-0.5, -0.8, 2.0);	// 6
-	glVertex3f(-0.5, 0, 0.5); 		// 4
-	glVertex3f(-0.5, 0, -0.5);		// 3
-	glVertex3f(-0.5, -1.5, -0.5);	// 10
+	CalculateVectorNormal(footVertices[3], footVertices[5], footVertices[8], &fNormalX, &fNormalY, &fNormalZ);
+	glNormal3f(fNormalX, fNormalY, fNormalZ);
+	glVertex3fv(footVertices[8]);	// 9
+	glVertex3fv(footVertices[5]);	// 6
+	glVertex3fv(footVertices[3]);	// 4
+	glVertex3fv(footVertices[2]);	// 3
+	glVertex3fv(footVertices[9]);	// 10
 	glEnd();
-
-	
 }
 
 // CONSTRUCTING HUMANOID
@@ -622,51 +801,7 @@ void robot() {
 	rightDLimb();
 }
 
-//*******************************************************************
-// Function: CalculateVectorNormal
-// 
-// Purpose: Given three points of a 3D plane, this function calculates
-//          the normal vector of that plane.
-// 
-// Parameters:
-//     fVert1[]   == array for 1st point (3 elements are x, y, and z).
-//     fVert2[]   == array for 2nd point (3 elements are x, y, and z).
-//     fVert3[]   == array for 3rd point (3 elements are x, y, and z).
-// 
-// Returns:
-//     fNormalX   == X vector for the normal vector
-//     fNormalY   == Y vector for the normal vector
-//     fNormalZ   == Z vector for the normal vector
-// 
-// Comments:
-// 
-// History:  Date       Author        Reason
-//           3/22/95     GGB           Created
-//**********************************************************************
-GLvoid CalculateVectorNormal(GLfloat fVert1[], GLfloat fVert2[], GLfloat fVert3[], GLfloat *fNormalX, GLfloat *fNormalY, GLfloat *fNormalZ) {
-	GLfloat Qx, Qy, Qz, Px, Py, Pz;
-
-	Qx = fVert2[0] - fVert1[0];
-	Qy = fVert2[1] - fVert1[1];
-	Qz = fVert2[2] - fVert1[2];
-	Px = fVert3[0] - fVert1[0];
-	Py = fVert3[1] - fVert1[1];
-	Pz = fVert3[2] - fVert1[2];
-
-	*fNormalX = Py * Qz - Pz * Qy;
-	*fNormalY = Pz * Qx - Px * Qz;
-	*fNormalZ = Px * Qy - Py * Qx;
-}
-
-// To convert floating points to array for vertices
-GLfloat *pointArrConv(GLfloat pointX, GLfloat pointY, GLfloat pointZ, GLfloat *pointArray) {
-	pointArray[0] = pointX;
-	pointArray[1] = pointY;
-	pointArray[2] = pointZ;
-
-	return pointArray;
-}
-
+// Map the light source 
 void lightSource() {
 	GLUquadricObj* sphere = NULL;
 	sphere = gluNewQuadric();
@@ -858,10 +993,18 @@ void display()
 	// Set up lighting
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, dif);
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-	if (lightOn)
+
+	glLightfv(GL_LIGHT1, GL_AMBIENT, amb);
+	glLightfv(GL_LIGHT1, GL_POSITION, lightPos);
+
+	if (lightOn) {
 		glEnable(GL_LIGHT0);
-	else
+		glEnable(GL_LIGHT1);
+	}
+	else {
 		glDisable(GL_LIGHT0);
+		glDisable(GL_LIGHT1);
+	}
 
 	glShadeModel(GL_SMOOTH);
 
