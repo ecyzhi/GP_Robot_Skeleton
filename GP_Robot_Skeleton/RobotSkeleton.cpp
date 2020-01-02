@@ -12,16 +12,18 @@
 GLfloat fNormalX, fNormalY, fNormalZ = 0.0;
 GLfloat pointArray[] = { 0.0, 0.0, 0.0 };
 
-float lx = 0.0;
-float ly = 0.8;
-float lz = 0.8;
+float lx = 8.0;
+float ly = 8.0;
+float lz = 8.0;
 float lightPos[] = { lx, ly, lz };
 
 float dif[] = { 1.0, 1.0, 1.0 };
-float green[] = { 0.0, 1.0, 0.0 };
-float grey[] = { 0.6, 0.6, 0.6 };
 
-float lightSpeed = 0.1;
+float green[] = { 0.0, 1.0, 0.0 };
+float yellow[] = { 1.0, 1.0, 0.0 };
+float white[] = { 1.0, 1.0, 1.0 };
+
+float lightSpeed = 0.5;
 boolean lightOn = false;
 
 // For Texture
@@ -55,32 +57,32 @@ void chest() {
 	glBegin(GL_POLYGON);
 	// Top
 	glVertex3f(2.5, 4, 1);		// 1
-	glVertex3f(2.5, 4, -1); 		// 2
-	glVertex3f(-2.5, 4, -1);		// 3
-	glVertex3f(-2.5, 4, 1); 		// 4
+	glVertex3f(2.5, 4, -1); 	// 2
+	glVertex3f(-2.5, 4, -1);	// 3
+	glVertex3f(-2.5, 4, 1); 	// 4
 
 	// Front
 	glVertex3f(1.5, 0, 0.8);	// 6
 	glVertex3f(2.5, 4, 1);		// 1
-	glVertex3f(-2.5, 4, 1); 		// 4
+	glVertex3f(-2.5, 4, 1); 	// 4
 	glVertex3f(-1.5, 0, 0.8);	// 7
 
 	// Right
 	glVertex3f(1.5, 0, -0.8);	// 5
-	glVertex3f(2.5, 4, -1); 		// 2
+	glVertex3f(2.5, 4, -1); 	// 2
 	glVertex3f(2.5, 4, 1);		// 1
 	glVertex3f(1.5, 0, 0.8);	// 6
 
 	// Back
 	glVertex3f(-1.5, 0, -0.8);	// 8
-	glVertex3f(-2.5, 4, -1);		// 3
-	glVertex3f(2.5, 4, -1); 		// 2
+	glVertex3f(-2.5, 4, -1);	// 3
+	glVertex3f(2.5, 4, -1); 	// 2
 	glVertex3f(1.5, 0, -0.8);	// 5
 
 	// Left
 	glVertex3f(-1.5, 0, 0.8);	// 7
-	glVertex3f(-2.5, 4, 1); 		// 4
-	glVertex3f(-2.5, 4, -1);		// 3
+	glVertex3f(-2.5, 4, 1); 	// 4
+	glVertex3f(-2.5, 4, -1);	// 3
 	glVertex3f(-1.5, 0, -0.8);	// 8
 
 	// Bottom
@@ -346,14 +348,14 @@ void headNeck() {
 
 
 	glPushMatrix();
-	glTranslatef(0.0, 6, 0.0);
-	head();
+		glTranslatef(0.0, 6, 0.0);
+		head();
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslatef(0.0, 4.8, 0.0);
-	glRotatef(90.0, 1.0, 0.0, 0.0);
-	neck();
+		glTranslatef(0.0, 4.8, 0.0);
+		glRotatef(90.0, 1.0, 0.0, 0.0);
+		neck();
 	glPopMatrix();
 
 	glPopAttrib();
@@ -665,6 +667,16 @@ GLfloat *pointArrConv(GLfloat pointX, GLfloat pointY, GLfloat pointZ, GLfloat *p
 	return pointArray;
 }
 
+void lightSource() {
+	GLUquadricObj* sphere = NULL;
+	sphere = gluNewQuadric();
+
+	//gluQuadricDrawStyle(sphere, GLU_LINE); //only draw line
+	gluSphere(sphere, 0.5, 10, 10);
+	gluDeleteQuadric(sphere);
+}
+
+
 
 //--------------------------------------------------------------------
 LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -780,9 +792,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				lightOn = true;
 		}
 		if (wParam == 'Z') {
-			lx = 0.0;
-			ly = 0.8;
-			lz = 0.8;
+			lx = 8.0;
+			ly = 8.0;
+			lz = 8.0;
 			lightOn = false;
 			lightPos[0] = lx;
 			lightPos[1] = ly;
@@ -852,32 +864,39 @@ void display()
 		glDisable(GL_LIGHT0);
 
 	glShadeModel(GL_SMOOTH);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
-	glMaterialfv(GL_BACK, GL_AMBIENT, grey);
+
+	// White color for light source
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
+	glMaterialfv(GL_BACK, GL_AMBIENT, white);
 
 	// Indicate the light source
-	glPointSize(20);
-	glBegin(GL_POINTS);
-	glVertex3f(lx, ly, lz);
-	glEnd();
+	glPushMatrix();
+	glTranslatef(lx, ly, lz);
+	lightSource();
+	glPopMatrix();
 
 	// Whole model rotation
 	if (rx != 0.0 || ry != 0.0 || rz != 0.0)
 		glRotatef(0.05, rx, ry, rz);
 
+	// Green color for robot
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+	glMaterialfv(GL_BACK, GL_AMBIENT, green);
+
 	// vv Draw outline vv
+	glDisable(GL_POLYGON_OFFSET_FILL);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glColor3f(1.0, 1.0, 1.0);
+	robot();
+
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(1.0, 0.0);
 	glColor3f(0.0, 0.0, 1.0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	robot();
-
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glColor3f(1.0, 1.0, 1.0);
 	// ^^ Draw outline ^^
 
-	robot();
+	
 
 }
 //--------------------------------------------------------------------
