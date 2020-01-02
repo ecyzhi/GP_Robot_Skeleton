@@ -8,16 +8,35 @@
 
 #define WINDOW_TITLE "Robot"
 
+// For Lighting
+GLfloat fNormalX, fNormalY, fNormalZ = 0.0;
+GLfloat pointArray[] = { 0.0, 0.0, 0.0 };
+
+float lx = 0.0;
+float ly = 0.8;
+float lz = 0.8;
+float lightPos[] = { lx, ly, lz };
+
+float dif[] = { 1.0, 1.0, 1.0 };
+float green[] = { 0.0, 1.0, 0.0 };
+
+float lightSpeed = 0.1;
+boolean lightOn = false;
+
+// For Texture
 GLuint texture = 0;
 
 BITMAP BMP;
 HBITMAP hBMP = NULL;
 
+
+// For rotation
 float rx, ry, rz = 0.0;
 
+// For part movement
 int movePart = 0;
 float mx, my, mz = 0.0;
-float speed = 0.1;
+float moveSpeed = 0.1;
 
 // TODO: Combine duplicating shapes Eg: upperlimbs, upperlimbs2, lowerlimbs, lowerlimbs2
 
@@ -600,7 +619,53 @@ void robot() {
 	rightDLimb();
 }
 
+//*******************************************************************
+// Function: CalculateVectorNormal
+// 
+// Purpose: Given three points of a 3D plane, this function calculates
+//          the normal vector of that plane.
+// 
+// Parameters:
+//     fVert1[]   == array for 1st point (3 elements are x, y, and z).
+//     fVert2[]   == array for 2nd point (3 elements are x, y, and z).
+//     fVert3[]   == array for 3rd point (3 elements are x, y, and z).
+// 
+// Returns:
+//     fNormalX   == X vector for the normal vector
+//     fNormalY   == Y vector for the normal vector
+//     fNormalZ   == Z vector for the normal vector
+// 
+// Comments:
+// 
+// History:  Date       Author        Reason
+//           3/22/95     GGB           Created
+//**********************************************************************
+GLvoid CalculateVectorNormal(GLfloat fVert1[], GLfloat fVert2[], GLfloat fVert3[], GLfloat *fNormalX, GLfloat *fNormalY, GLfloat *fNormalZ) {
+	GLfloat Qx, Qy, Qz, Px, Py, Pz;
 
+	Qx = fVert2[0] - fVert1[0];
+	Qy = fVert2[1] - fVert1[1];
+	Qz = fVert2[2] - fVert1[2];
+	Px = fVert3[0] - fVert1[0];
+	Py = fVert3[1] - fVert1[1];
+	Pz = fVert3[2] - fVert1[2];
+
+	*fNormalX = Py * Qz - Pz * Qy;
+	*fNormalY = Pz * Qx - Px * Qz;
+	*fNormalZ = Px * Qy - Py * Qx;
+}
+
+// To convert floating points to array for vertices
+GLfloat *pointArrConv(GLfloat pointX, GLfloat pointY, GLfloat pointZ, GLfloat *pointArray) {
+	pointArray[0] = pointX;
+	pointArray[1] = pointY;
+	pointArray[2] = pointZ;
+
+	return pointArray;
+}
+
+
+//--------------------------------------------------------------------
 LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -680,11 +745,45 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			else
 				movePart = 91;
 		}
-
-
-
-
-
+		if (wParam == 'I') {
+			ly += lightSpeed;
+			lightPos[1] = ly;
+		}
+		if (wParam == 'K') {
+			ly -= lightSpeed;
+			lightPos[1] = ly;
+		}
+		if (wParam == 'J') {
+			lx -= lightSpeed;
+			lightPos[0] = lx;
+		}
+		if (wParam == 'L') {
+			lx += lightSpeed;
+			lightPos[0] = lx;
+		}
+		if (wParam == 'O') {
+			lz -= lightSpeed;
+			lightPos[2] = lz;
+		}
+		if (wParam == 'U') {
+			lz += lightSpeed;
+			lightPos[2] = lz;
+		}
+		if (wParam == 'P') {
+			if (lightOn)
+				lightOn = false;
+			else
+				lightOn = true;
+		}
+		if (wParam == 'Z') {
+			lx = 0.0;
+			ly = 0.8;
+			lz = 0.8;
+			lightOn = false;
+			lightPos[0] = lx;
+			lightPos[1] = ly;
+			lightPos[2] = lz;
+		}
 
 		break;
 
@@ -732,9 +831,33 @@ void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+	if (lightOn)
+		glEnable(GL_LIGHTING);
+	else
+		glDisable(GL_LIGHTING);
+
 
 	glMatrixMode(GL_MODELVIEW);
 
+	// Set up lighting
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, dif);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+	if (lightOn)
+		glEnable(GL_LIGHT0);
+	else
+		glDisable(GL_LIGHT0);
+
+	glShadeModel(GL_SMOOTH);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+	glMaterialfv(GL_BACK, GL_AMBIENT, green);
+
+	// Indicate the light source
+	glPointSize(20);
+	glBegin(GL_POINTS);
+	glVertex3f(lx, ly, lz);
+	glEnd();
+
+	// Whole model rotation
 	if (rx != 0.0 || ry != 0.0 || rz != 0.0)
 		glRotatef(0.05, rx, ry, rz);
 
