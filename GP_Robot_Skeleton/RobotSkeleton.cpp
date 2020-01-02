@@ -35,13 +35,21 @@ HBITMAP hBMP = NULL;
 
 // For rotation
 float rx, ry, rz = 0.0;
+float rotateSpeed = 10;
 
 // For part movement
 int movePart = 0;
+
+float moveSpeed = 5;
+
 float mx, my, mz = 0.0;
-float moveSpeed = 0.1;
+
+float accmX[12] = { 0.0 };
+float accmY[12] = { 0.0 };
+float accmZ[12] = { 0.0 };
 
 // TODO: Combine duplicating shapes Eg: upperlimbs, upperlimbs2, lowerlimbs, lowerlimbs2
+// Improvement 1: Now when selecting both left and right part, the rotation will follow the left side due to getting value for mx,my,mz from accm[left]
 
 //*******************************************************************
 // Function: CalculateVectorNormal
@@ -79,6 +87,25 @@ GLvoid CalculateVectorNormal(GLfloat fVert1[], GLfloat fVert2[], GLfloat fVert3[
 	*fNormalZ = Px * Qy - Py * Qx;
 }
 
+// Easier to visualise the transformation matrix
+void axisLine() {
+	glPushAttrib(GL_CURRENT_BIT);
+	glBegin(GL_LINES);
+
+	glColor3f(1.0, 0.0, 0.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(3.0, 0.0, 0.0);
+
+	glColor3f(1.0, 1.0, 0.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 3.0, 0.0);
+
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 0.0, 3.0);
+	glEnd();
+	glPopAttrib();
+}
 
 // DEVELOPING BASIC SHAPES
 void head() {
@@ -590,12 +617,34 @@ void leftULimb() {
 		glColor3f(1.0, 0.0, 0.0);
 	}
 
+	//glPushMatrix();
+	//glRotatef(accmX[3], 1, 0, 0);
+	//glRotatef(accmY[3], 0, 1, 0);
+	//glRotatef(accmZ[3], 0, 0, 1);
+	//if (movePart == 31 || movePart == 33) {
+	//	accmX[3] = mx;
+	//	accmY[3] = my;
+	//	accmZ[3] = mz;
+
+	//	axisLine();
+	//}
+
 	glPushAttrib(GL_CURRENT_BIT);
 	if (movePart == 41 || movePart == 43) {
 		glColor3f(1.0, 0.0, 0.0);
 	}
 	glPushMatrix();
 		glTranslatef(2.5, 3, 0.0);
+		glRotatef(accmX[3], 1, 0, 0);
+		glRotatef(accmY[3], 0, 1, 0);
+		glRotatef(accmZ[3], 0, 0, 1);
+		if (movePart == 41 || movePart == 43) {
+			accmX[3] = mx;
+			accmY[3] = my;
+			accmZ[3] = mz;
+
+			axisLine();
+		}
 		upperLimbs();
 	glPopMatrix();
 	glPopAttrib();
@@ -606,6 +655,16 @@ void leftULimb() {
 	}
 	glPushMatrix();
 		glTranslatef(2.5, 0.1, 0.0);
+		glRotatef(accmX[5], 1, 0, 0);
+		glRotatef(accmY[5], 0, 1, 0);
+		glRotatef(accmZ[5], 0, 0, 1);
+		if (movePart == 51 || movePart == 53) {
+			accmX[5] = mx;
+			accmY[5] = my;
+			accmZ[5] = mz;
+
+			axisLine();
+		}
 		upperLimbs2();
 	glPopMatrix();
 	glPopAttrib();
@@ -618,6 +677,8 @@ void leftULimb() {
 		glTranslatef(2.5, -2.8, 0.0);
 		upperLimbs3();
 	glPopMatrix();
+
+	//glPopMatrix();
 	glPopAttrib();
 
 	glPopAttrib();
@@ -635,6 +696,16 @@ void rightULimb() {
 	}
 	glPushMatrix();
 		glTranslatef(-2.5, 3, 0.0);
+		glRotatef(accmX[4], 1, 0, 0);
+		glRotatef(accmY[4], 0, 1, 0);
+		glRotatef(accmZ[4], 0, 0, 1);
+		if (movePart == 42 || movePart == 43) {
+			accmX[4] = mx;
+			accmY[4] = my;
+			accmZ[4] = mz;
+
+			axisLine();
+		}
 		upperLimbs();
 	glPopMatrix();
 	glPopAttrib();
@@ -645,6 +716,16 @@ void rightULimb() {
 	}
 	glPushMatrix();
 		glTranslatef(-2.5, 0.1, 0.0);
+		glRotatef(accmX[6], 1, 0, 0);
+		glRotatef(accmY[6], 0, 1, 0);
+		glRotatef(accmZ[6], 0, 0, 1);
+		if (movePart == 52 || movePart == 53) {
+			accmX[6] = mx;
+			accmY[6] = my;
+			accmZ[6] = mz;
+
+			axisLine();
+		}
 		upperLimbs2();
 	glPopMatrix();
 	glPopAttrib();
@@ -812,7 +893,6 @@ void lightSource() {
 }
 
 
-
 //--------------------------------------------------------------------
 LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -824,23 +904,58 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 	case WM_KEYDOWN:
 		if (wParam == VK_ESCAPE) PostQuitMessage(0);
-		if (wParam == 'W') { rx = -1.0; ry = 0.0; rz = 0.0; }
-		if (wParam == 'S') { rx = 1.0; ry = 0.0; rz = 0.0; }
-		if (wParam == 'A') { rx = 0.0; ry = -1.0; rz = 0.0; }
-		if (wParam == 'D') { rx = 0.0; ry = 1.0; rz = 0.0; }
-		if (wParam == 'Q') { rx = 0.0; ry = 0.0; rz = 1.0; }
-		if (wParam == 'E') { rx = 0.0; ry = 0.0; rz = -1.0; }
-		if (wParam == VK_SPACE) { rx = 0.0; ry = 0.0; rz = 0.0; glLoadIdentity(); }
+		if (wParam == 'W') { rx = -1.0; ry = 0.0; rz = 0.0; glRotatef(rotateSpeed, -1.0, 0.0, 0.0); }
+		if (wParam == 'S') { rx = 1.0; ry = 0.0; rz = 0.0;	glRotatef(rotateSpeed, 1.0, 0.0, 0.0);  }
+		if (wParam == 'A') { rx = 0.0; ry = -1.0; rz = 0.0; glRotatef(rotateSpeed, 0.0, -1.0, 0.0); }
+		if (wParam == 'D') { rx = 0.0; ry = 1.0; rz = 0.0;	glRotatef(rotateSpeed, 0.0, 1.0, 0.0);	}
+		if (wParam == 'Q') { rx = 0.0; ry = 0.0; rz = 1.0;	glRotatef(rotateSpeed, 0.0, 0.0, 1.0);	}
+		if (wParam == 'E') { rx = 0.0; ry = 0.0; rz = -1.0; glRotatef(rotateSpeed, 0.0, 0.0, -1.0); }
+		if (wParam == VK_SPACE) {
+			rx = 0.0; 
+			ry = 0.0; 
+			rz = 0.0; 
+			lx = 8.0;
+			ly = 8.0;
+			lz = 8.0;
+			lightOn = false;
+			lightPos[0] = lx;
+			lightPos[1] = ly;
+			lightPos[2] = lz;
+			movePart = 0;
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
+
+			for (int i = 0; i < 12; i++) {
+				accmX[i] = 0.0;
+				accmY[i] = 0.0;
+				accmZ[i] = 0.0;
+			}
+
+			glLoadIdentity(); 
+		}
 		if (wParam == 0x30) {
 			movePart = 0;
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
 		}
 		if (wParam == 0x31) {
 			movePart = 1;
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
 		}
 		if (wParam == 0x32) {
 			movePart = 2;
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
 		}
 		if (wParam == 0x33) {
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
 			if (movePart == 31) 
 				movePart = 32;
 			else if (movePart == 32)
@@ -849,22 +964,55 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				movePart = 31;
 		}
 		if (wParam == 0x34) {
-			if (movePart == 41)
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
+			if (movePart == 41) {
 				movePart = 42;
-			else if (movePart == 42)
+				mx = accmX[4];
+				my = accmY[4];
+				mz = accmZ[4];
+			}
+			else if (movePart == 42) {
 				movePart = 43;
-			else
+				mx = accmX[3];
+				my = accmY[3];
+				mz = accmZ[3];
+			}
+			else {
 				movePart = 41;
+				mx = accmX[3];
+				my = accmY[3];
+				mz = accmZ[3];
+			}
 		}
 		if (wParam == 0x35) {
-			if (movePart == 51)
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
+			if (movePart == 51) {
 				movePart = 52;
-			else if (movePart == 52)
+				mx = accmX[6];
+				my = accmY[6];
+				mz = accmZ[6];
+			}
+			else if (movePart == 52) {
 				movePart = 53;
-			else
+				mx = accmX[5];
+				my = accmY[5];
+				mz = accmZ[5];
+			}
+			else {
 				movePart = 51;
+				mx = accmX[5];
+				my = accmY[5];
+				mz = accmZ[5];
+			}
 		}
 		if (wParam == 0x36) {
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
 			if (movePart == 61)
 				movePart = 62;
 			else if (movePart == 62)
@@ -873,6 +1021,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				movePart = 61;
 		}
 		if (wParam == 0x37) {
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
 			if (movePart == 71)
 				movePart = 72;
 			else if (movePart == 72)
@@ -881,6 +1032,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				movePart = 71;
 		}
 		if (wParam == 0x38) {
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
 			if (movePart == 81)
 				movePart = 82;
 			else if (movePart == 82)
@@ -889,6 +1043,9 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				movePart = 81;
 		}
 		if (wParam == 0x39) {
+			mx = 0.0;
+			my = 0.0;
+			mz = 0.0;
 			if (movePart == 91)
 				movePart = 92;
 			else if (movePart == 92)
@@ -930,11 +1087,19 @@ LRESULT WINAPI WindowProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 			lx = 8.0;
 			ly = 8.0;
 			lz = 8.0;
-			lightOn = false;
+			lightOn = true;
 			lightPos[0] = lx;
 			lightPos[1] = ly;
 			lightPos[2] = lz;
 		}
+		if (wParam == 'T') { mx -= moveSpeed;	my += 0.0;			mz += 0.0;		}
+		if (wParam == 'G') { mx += moveSpeed;	my += 0.0;			mz += 0.0;		}
+		if (wParam == 'F') { mx += 0.0;			my += 0.0;			mz -= moveSpeed;}
+		if (wParam == 'H') { mx += 0.0;			my += 0.0;			mz += moveSpeed;}
+		if (wParam == 'Y') { mx += 0.0;			my += moveSpeed;	mz += 0.0;		}
+		if (wParam == 'R') { mx += 0.0;			my -= moveSpeed;	mz += 0.0;		}
+		
+		
 
 		break;
 
@@ -1008,19 +1173,21 @@ void display()
 
 	glShadeModel(GL_SMOOTH);
 
-	// White color for light source
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
-	glMaterialfv(GL_BACK, GL_AMBIENT, white);
+	if (lightOn) {
+		// White color for light source
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
+		glMaterialfv(GL_BACK, GL_AMBIENT, white);
 
-	// Indicate the light source
-	glPushMatrix();
-	glTranslatef(lx, ly, lz);
-	lightSource();
-	glPopMatrix();
+		// Indicate the light source
+		glPushMatrix();
+		glTranslatef(lx, ly, lz);
+		lightSource();
+		glPopMatrix();
+	}
 
-	// Whole model rotation
-	if (rx != 0.0 || ry != 0.0 || rz != 0.0)
-		glRotatef(0.05, rx, ry, rz);
+	// Whole model continuous rotation
+	//if (rx != 0.0 || ry != 0.0 || rz != 0.0)
+	//	glRotatef(0.05, rx, ry, rz);
 
 	// Green color for robot
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
